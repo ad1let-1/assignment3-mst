@@ -1,32 +1,43 @@
 package mst.algorithms;
 
-import mst.model.*;
+import mst.model.Edge;
+import mst.model.Graph;
 import mst.util.DisjointSet;
+
 import java.util.*;
 
 public class Kruskal {
-    public static Result run(Graph graph) {
-        long start = System.currentTimeMillis();
+    public static class Metrics {
+        public List<Edge> mst = new ArrayList<>();
+        public int cost = 0;
+        public long ops = 0;
+        public double ms = 0;
+    }
 
-        List<Edge> mst = new ArrayList<>();
-        DisjointSet ds = new DisjointSet();
+    public Metrics run(Graph g) {
+        long t0 = System.nanoTime();
+        Metrics m = new Metrics();
 
-        for (int i = 0; i < graph.vertices; i++) ds.makeSet(i);
-        Collections.sort(graph.edges);
+        if (g.V() == 0) { m.ms = 0; return m; }
+        if (!g.isConnected()) { m.ms = 0; return m; }
 
-        for (Edge edge : graph.edges) {
-            int root1 = ds.find(edge.src);
-            int root2 = ds.find(edge.dest);
+        List<Edge> sorted = new ArrayList<>(g.edges());
+        Collections.sort(sorted);
 
-            if (root1 != root2) {
-                mst.add(edge);
-                ds.union(root1, root2);
+        DisjointSet<String> dsu = new DisjointSet<>();
+        for (String v : g.nodes()) dsu.makeSet(v);
+
+        for (Edge e : sorted) {
+            if (dsu.union(e.from, e.to)) {
+                m.mst.add(e);
+                m.cost += e.weight;
             }
         }
+        m.ops = dsu.ops + sorted.size();
 
-        int totalWeight = mst.stream().mapToInt(e -> e.weight).sum();
-        long end = System.currentTimeMillis();
-
-        return new Result("Kruskal", totalWeight, end - start, mst);
+        long t1 = System.nanoTime();
+        m.ms = (t1 - t0) / 1_000_000.0;
+        return m;
     }
 }
+

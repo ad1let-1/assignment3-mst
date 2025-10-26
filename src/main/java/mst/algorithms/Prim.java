@@ -1,38 +1,47 @@
 package mst.algorithms;
 
-import mst.model.*;
+import mst.model.Edge;
+import mst.model.Graph;
+
 import java.util.*;
 
 public class Prim {
-    public static Result run(Graph graph) {
-        long start = System.currentTimeMillis();
+    public static class Metrics {
+        public List<Edge> mst = new ArrayList<>();
+        public int cost = 0;
+        public long ops = 0;
+        public double ms = 0;
+    }
 
-        boolean[] inMST = new boolean[graph.vertices];
+    public Metrics run(Graph g) {
+        long t0 = System.nanoTime();
+        Metrics m = new Metrics();
+
+        if (g.V() == 0) { m.ms = 0; return m; }
+        if (!g.isConnected()) { m.ms = 0; return m; }
+
+        Set<String> in = new HashSet<>();
         PriorityQueue<Edge> pq = new PriorityQueue<>();
-        List<Edge> mst = new ArrayList<>();
+        String start = g.nodes().get(0);
+        in.add(start);
+        pq.addAll(g.adj().get(start));
+        m.ops += g.adj().get(start).size();
 
-        inMST[0] = true;
-        for (Edge e : graph.edges)
-            if (e.src == 0 || e.dest == 0) pq.add(e);
+        while (in.size() < g.V() && !pq.isEmpty()) {
+            Edge e = pq.poll(); m.ops++;
+            if (in.contains(e.to) && in.contains(e.from)) continue;
+            String next = in.contains(e.from) ? e.to : e.from;
+            if (in.contains(next)) continue;
 
-        while (!pq.isEmpty() && mst.size() < graph.vertices - 1) {
-            Edge edge = pq.poll();
-            if (inMST[edge.src] && inMST[edge.dest]) continue;
+            in.add(next);
+            m.mst.add(e);
+            m.cost += e.weight;
 
-            mst.add(edge);
-            int next = inMST[edge.src] ? edge.dest : edge.src;
-            inMST[next] = true;
-
-            for (Edge e : graph.edges) {
-                if ((e.src == next && !inMST[e.dest]) || (e.dest == next && !inMST[e.src])) {
-                    pq.add(e);
-                }
-            }
+            for (Edge ne : g.adj().get(next)) { pq.add(ne); m.ops++; }
         }
 
-        int totalWeight = mst.stream().mapToInt(e -> e.weight).sum();
-        long end = System.currentTimeMillis();
-
-        return new Result("Prim", totalWeight, end - start, mst);
+        long t1 = System.nanoTime();
+        m.ms = (t1 - t0) / 1_000_000.0;
+        return m;
     }
 }

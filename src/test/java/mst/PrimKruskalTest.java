@@ -1,23 +1,61 @@
 package mst;
 
-import mst.alg.*;
-import mst.model.*;
+import mst.algorithms.Kruskal;
+import mst.algorithms.Prim;
+import mst.model.Edge;
+import mst.model.Graph;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PrimKruskalTest {
+
+    private Graph sample() {
+        List<String> nodes = List.of("A", "B", "C", "D");
+        List<Edge> edges = List.of(
+                new Edge("A", "B", 1),
+                new Edge("A", "C", 4),
+                new Edge("B", "C", 2),
+                new Edge("C", "D", 3),
+                new Edge("B", "D", 5)
+        );
+        return new Graph(nodes, edges);
+    }
+
     @Test
-    void testAlgorithms() {
-        Graph g = new Graph(4);
-        g.addEdge(0, 1, 10);
-        g.addEdge(0, 2, 6);
-        g.addEdge(0, 3, 5);
-        g.addEdge(1, 3, 15);
-        g.addEdge(2, 3, 4);
+    void sameCostAndSize() {
+        Graph g = sample();
 
-        Result prim = Prim.run(g);
-        Result kruskal = Kruskal.run(g);
+        var primMetrics = new Prim().run(g);
+        var kruskalMetrics = new Kruskal().run(g);
 
-        assertEquals(kruskal.totalWeight, prim.totalWeight);
+        assertEquals(primMetrics.cost, kruskalMetrics.cost, "MST costs must be equal");
+
+        assertEquals(g.V() - 1, primMetrics.mst.size(), "Prim MST edges must be V-1");
+        assertEquals(g.V() - 1, kruskalMetrics.mst.size(), "Kruskal MST edges must be V-1");
+
+        assertTrue(primMetrics.ms >= 0);
+        assertTrue(kruskalMetrics.ms >= 0);
+        assertTrue(primMetrics.ops >= 0);
+        assertTrue(kruskalMetrics.ops >= 0);
+    }
+
+    @Test
+    void disconnectedGraphHandled() {
+        Graph g = new Graph(
+                List.of("A", "B", "C"),
+                List.of(new Edge("A", "B", 1)) // C изолирована
+        );
+
+        var primMetrics = new Prim().run(g);
+        var kruskalMetrics = new Kruskal().run(g);
+
+        assertEquals(0, primMetrics.mst.size());
+        assertEquals(0, kruskalMetrics.mst.size());
+        assertEquals(0, primMetrics.cost);
+        assertEquals(0, kruskalMetrics.cost);
     }
 }
+
