@@ -51,13 +51,13 @@ but work in a bit different ways.
 
 ### Execution Time vs Graph Size
 
-![Execution Time](<img width="780" height="372" alt="Execution Time vs Graph Size" src="https://github.com/user-attachments/assets/7a00dde1-9d81-423b-b91f-143af3eaf8c8" />
-)
+<img width="780" height="372" alt="Execution Time vs Graph Size" src="https://github.com/user-attachments/assets/582429b4-e819-46d2-a1ca-df1f8876baff" />
+
 
 ### Operation Count vs Graph Size
 
-![Operation Count](<img width="741" height="355" alt="Operation Count vs Graph Size" src="https://github.com/user-attachments/assets/2ee7698e-94b8-4f03-bd01-0af880024ecb" />
-)
+<img width="741" height="355" alt="Operation Count vs Graph Size" src="https://github.com/user-attachments/assets/df9dba32-865b-476a-8b03-5728d405ef71" />
+
 
 ---
 
@@ -110,3 +110,4 @@ There are simple tests in `test/java/mst/` that check:
 * and disconnected graphs are handled correctly.
 
 ---
+
